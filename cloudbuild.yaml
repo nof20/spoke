@@ -1,0 +1,16 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - '-t'
+      - 'us-docker.pkg.dev/$PROJECT_ID/spoke/spoke:$TAG_NAME'
+      - '-t'
+      - 'us-docker.pkg.dev/$PROJECT_ID/spoke/spoke:latest'
+      - .
+    id: build
+timeout: 43200s
+images:
+  - 'us-docker.pkg.dev/$PROJECT_ID/spoke/spoke:$TAG_NAME'
+  - 'us-docker.pkg.dev/$PROJECT_ID/spoke/spoke:latest'
+options:
+  machineType: E2_HIGHCPU_8
