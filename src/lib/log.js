@@ -31,7 +31,8 @@ if (isClient()) {
 
   minilog
     .enable()
-    .pipe(minilog.backends.console.formatWithStack)
+    // .pipe(minilog.backends.console.formatWithStack)
+    .pipe(minilog.backends.console.formatClean)
     .pipe(minilog.backends.console);
 
   logInstance = minilog("backend");
