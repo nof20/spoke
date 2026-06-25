@@ -2,7 +2,7 @@ import passport from "passport";
 import Auth0Strategy from "passport-auth0";
 import { Strategy as LocalStrategy } from "passport-local";
 import slack from "@aoberoi/passport-slack";
-import { User, UserOrganization, Organization, cacheableData } from "./models";
+import { User, UserOrganization, Organization, cacheableData, r } from "./models";
 import localAuthHelpers from "./local-auth-helpers";
 import wrap from "./wrap";
 import { capitalizeWord } from "./api/lib/utils";
