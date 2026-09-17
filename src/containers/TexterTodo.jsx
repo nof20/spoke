@@ -201,11 +201,17 @@ export class TexterTodo extends React.Component {
 
   loadContacts = async contactIds => {
     this.loadingAssignmentContacts = true;
-    const newContacts = await this.props.mutations.getAssignmentContacts(
-      contactIds
-    );
-    this.loadingAssignmentContacts = false;
-    return newContacts;
+    try {
+      const newContacts = await this.props.mutations.getAssignmentContacts(
+        contactIds
+      );
+      return newContacts;
+    } catch (err) {
+      console.error("loadContacts error:", err);
+      return { data: { getAssignmentContacts: [] } };
+    } finally {
+      this.loadingAssignmentContacts = false;
+    }
   };
 
   refreshData = () => {

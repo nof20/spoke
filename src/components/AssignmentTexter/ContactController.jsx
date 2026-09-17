@@ -204,28 +204,35 @@ export class ContactController extends React.Component {
     if (getIds.length) {
       // console.log('getContactData length', newIndex, getIds.length)
       this.setState({ loading: true });
-      const contactData = await this.props.loadContacts(getIds);
-      let getAssignmentContacts;
-      if (contactData && contactData.data) {
-        getAssignmentContacts = contactData.data.getAssignmentContacts;
-      }
+      try {
+        const contactData = await this.props.loadContacts(getIds);
+        let getAssignmentContacts;
+        if (contactData && contactData.data) {
+          getAssignmentContacts = contactData.data.getAssignmentContacts;
+        }
 
-      if (getAssignmentContacts) {
-        const newContactData = {};
-        getAssignmentContacts.forEach((c, i) => {
-          if (c && c.id) {
-            newContactData[c.id] = c;
-          } else {
-            // store the null result so that we know to skip it
-            const badId = getIds[i];
-            newContactData[badId] = null;
-          }
-        });
-        // console.log('getContactData results<new data>', newContactData, getAssignmentContacts)
-        this.setState({
-          loading: false,
-          contactCache: { ...this.state.contactCache, ...newContactData }
-        });
+        if (getAssignmentContacts) {
+          const newContactData = {};
+          getAssignmentContacts.forEach((c, i) => {
+            if (c && c.id) {
+              newContactData[c.id] = c;
+            } else {
+              // store the null result so that we know to skip it
+              const badId = getIds[i];
+              newContactData[badId] = null;
+            }
+          });
+          // console.log('getContactData results<new data>', newContactData, getAssignmentContacts)
+          this.setState({
+            loading: false,
+            contactCache: { ...this.state.contactCache, ...newContactData }
+          });
+        } else {
+          this.setState({ loading: false });
+        }
+      } catch (err) {
+        console.error("getContactData error:", err);
+        this.setState({ loading: false });
       }
     }
   };

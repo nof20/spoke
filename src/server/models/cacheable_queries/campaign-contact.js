@@ -353,9 +353,15 @@ const campaignContactCache = {
     }
     console.log("contact loadMany finish stream", campaign.id);
   },
-  orgId: async contact =>
-    contact.organization_id ||
-    ((await campaignCache.load(contact.campaign_id)) || {}).organization_id,
+  orgId: async contact => {
+    if (!contact || Array.isArray(contact) || !contact.campaign_id) {
+      return (contact && contact.organization_id) || null;
+    }
+    return (
+      contact.organization_id ||
+      ((await campaignCache.load(contact.campaign_id)) || {}).organization_id
+    );
+  },
   lookupByCell: async (
     cell,
     service,

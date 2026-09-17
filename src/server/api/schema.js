@@ -1207,12 +1207,18 @@ const rootMutations = {
       { assignmentId, contactIds, findNew },
       { user, loaders }
     ) => {
-      if (contactIds.length === 0) {
+      if (!contactIds || contactIds.length === 0) {
         return [];
       }
-      const firstContact = await cacheableData.campaignContact.load(
+      const rawFirst = await cacheableData.campaignContact.load(
         contactIds[0]
       );
+      const firstContact =
+        rawFirst && !Array.isArray(rawFirst) && rawFirst.id ? rawFirst : null;
+
+      if (!firstContact) {
+        return [];
+      }
       const organizationId = await cacheableData.campaignContact.orgId(
         firstContact
       );
@@ -1229,10 +1235,13 @@ const rootMutations = {
       const contacts = await Promise.all(
         contactIds.map(
           // FUTURE: consider a better path for no-caching to load all ids at the same time with loadMany
-          async (contactId, cIdx) =>
-            cIdx === 0
-              ? firstContact
-              : await cacheableData.campaignContact.load(contactId)
+          async (contactId, cIdx) => {
+            if (cIdx === 0) {
+              return firstContact;
+            }
+            const c = await cacheableData.campaignContact.load(contactId);
+            return c && !Array.isArray(c) && c.id ? c : null;
+          }
         )
       );
       const hasAssn = contact =>
@@ -1251,7 +1260,9 @@ const rootMutations = {
           retries.map(c => cacheableData.campaignContact.load(c.id))
         );
         retriedContacts.forEach(c => {
-          updatedContacts[c.id] = c;
+          if (c && c.id) {
+            updatedContacts[c.id] = c;
+          }
         });
       }
       console.log("getAssignedContacts", contacts.length, updatedContacts);

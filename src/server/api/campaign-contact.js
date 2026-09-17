@@ -13,12 +13,12 @@ import { accessRequired } from "./errors";
 export const resolvers = {
   Location: {
     timezone: zipCode => zipCode || {},
-    city: zipCode => zipCode.city || "",
-    state: zipCode => zipCode.state || ""
+    city: zipCode => (zipCode && zipCode.city) || "",
+    state: zipCode => (zipCode && zipCode.state) || ""
   },
   Timezone: {
-    offset: zipCode => zipCode.timezone_offset || null,
-    hasDST: zipCode => zipCode.has_dst || null
+    offset: zipCode => (zipCode && zipCode.timezone_offset) || null,
+    hasDST: zipCode => (zipCode && zipCode.has_dst) || null
   },
   ContactTag: {
     ...mapFieldsToModel(["id", "value"], TagCampaignContact),
@@ -108,7 +108,13 @@ export const resolvers = {
         }
         return loc;
       }
+      if (!campaignContact.zip) {
+        return null;
+      }
       const mainZip = campaignContact.zip.split("-")[0];
+      if (!mainZip) {
+        return null;
+      }
       const calculated = zipToTimeZone(mainZip);
       if (calculated) {
         return {
@@ -116,7 +122,7 @@ export const resolvers = {
           has_dst: calculated[3] === 1
         };
       }
-      return await loaders.zipCode.load(mainZip);
+      return (await loaders.zipCode.load(mainZip)) || null;
     },
     messages: async campaignContact => {
       if (campaignContact.message_status === "needsMessage") {
@@ -160,7 +166,7 @@ export const resolvers = {
           organizationId = campaign.organization_id;
         }
 
-        const isOptedOut = await cacheableData.optOut.query({
+        isOptedOut = await cacheableData.optOut.query({
           cell: campaignContact.cell,
           organizationId
         });

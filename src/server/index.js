@@ -71,6 +71,7 @@ const server = new ApolloServer({
   introspection: true,
   plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
   formatError: error => {
+    console.error("GraphQL error:", error ? error.originalError || error : error);
     if (process.env.SHOW_SERVER_ERROR || process.env.DEBUG) {
       if (error instanceof GraphQLError) {
         return error;

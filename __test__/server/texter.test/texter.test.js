@@ -207,3 +207,36 @@ it("should be able to receive a response and reply (using fakeService)", async (
   const ret4 = await runGql(getAssignmentContacts, assignVars, testTexterUser);
   expect(ret4.data.getAssignmentContacts[0].messageStatus).toEqual("convo");
 });
+
+it("should safely handle contacts with null or missing zip codes and empty timezone_offset", async () => {
+  const organizationId = testOrganization.data.createOrganization.id;
+  const texterTodoProps = {
+    messageStatus: "needsMessage",
+    params: { assignmentId: assignmentId.toString(), organizationId },
+    location: { query: {} }
+  };
+
+  // Set the contact zip to "" and timezone_offset to "" in DB
+  await r
+    .knex("campaign_contact")
+    .where({ id: testContact.id })
+    .update({
+      zip: "",
+      timezone_offset: ""
+    });
+
+  const [getAssignmentContacts, assignVars] = getAssignmentContactsMutAndVars(
+    texterTodoProps,
+    [testContact.id.toString()],
+    false
+  );
+
+  const ret = await runGql(getAssignmentContacts, assignVars, testTexterUser);
+  expect(ret.errors).toBeUndefined();
+  expect(ret.data.getAssignmentContacts.length).toEqual(1);
+  expect(ret.data.getAssignmentContacts[0].id).toEqual(
+    testContact.id.toString()
+  );
+  expect(ret.data.getAssignmentContacts[0].location).toBeNull();
+});
+

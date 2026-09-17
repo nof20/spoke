@@ -69,7 +69,7 @@ export async function assignmentRequiredOrAdminRole(
   const roleRequired = userHasAssignment ? "TEXTER" : "SUPERVOLUNTEER";
   const hasPermission = await cacheableData.user.userHasRole(
     user,
-    orgId.toString(),
+    orgId ? orgId.toString() : "",
     roleRequired
   );
   if (!hasPermission) {
