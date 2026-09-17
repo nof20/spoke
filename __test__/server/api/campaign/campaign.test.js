@@ -1144,6 +1144,41 @@ describe("Bulk Send", () => {
       expectSuccessBulkSending(params.bulkSendBatchSize)
     );
   });
+
+  it("should assign and send bulk texts when campaign batch_size is smaller than chunk size", async () => {
+    const chunkAndBatchSize = 20;
+    process.env.ALLOW_SEND_ALL = true;
+    process.env.ALLOW_SEND_ALL_ENABLED = true;
+    process.env.BULK_SEND_CHUNK_SIZE = chunkAndBatchSize;
+    process.env.BULK_SEND_BATCH_SIZE = chunkAndBatchSize;
+
+    testCampaign.use_dynamic_assignment = true;
+    testCampaign.batch_size = 1;
+    await r
+      .knex("campaign")
+      .where("id", testCampaign.id)
+      .update({ use_dynamic_assignment: true, batch_size: 1 });
+
+    // Leave 1 contact assigned to assignmentId and unassign the remaining contacts
+    await r
+      .knex("campaign_contact")
+      .where("campaign_id", testCampaign.id)
+      .where("id", "!=", testContacts[0].id)
+      .update({ assignment_id: null });
+
+    await createScript(testAdminUser, testCampaign);
+    await startCampaign(testAdminUser, testCampaign);
+
+    const bulkSendResult = await bulkSendMessages(
+      parseInt(assignmentId),
+      testTexterUser
+    );
+
+    expect(bulkSendResult.errors).toBeFalsy();
+    expect(bulkSendResult.data.bulkSendMessages.length).toEqual(
+      chunkAndBatchSize
+    );
+  });
 });
 
 describe("campaigns query", () => {

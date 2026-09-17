@@ -26,3 +26,6 @@ scratch/
 cypress/screenshots
 cypress/videos
 spoke-pm2.config.js
+
+# Antigravity CLI
+.antigravitycli/

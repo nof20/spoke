@@ -78,19 +78,27 @@ export const findNewCampaignContact = async (
     r.knex("campaign_contact").where("assignment_id", assignmentId)
   );
 
-  numberContacts = Math.min(
-    numberContacts || campaign.batch_size || 1,
-    campaign.batch_size === null
-      ? availableCount // if null, then probably a legacy campaign
-      : campaign.batch_size,
-    availableCount
-  );
+  if (bulKSendAssignment) {
+    numberContacts = Math.min(numberContacts || 1, availableCount);
+  } else {
+    numberContacts = Math.min(
+      numberContacts || campaign.batch_size || 1,
+      campaign.batch_size === null
+        ? availableCount // if null, then probably a legacy campaign
+        : campaign.batch_size,
+      availableCount
+    );
+  }
 
   if (
     assignment.max_contacts &&
     contactsCount + numberContacts > assignment.max_contacts
   ) {
     numberContacts = assignment.max_contacts - contactsCount;
+  }
+
+  if (numberContacts <= 0) {
+    return falseRetVal;
   }
 
   policyArgs.numberContacts = numberContacts;

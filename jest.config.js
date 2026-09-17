@@ -58,6 +58,7 @@ module.exports = {
     "!**/deploy/**",
     "!**/coverage/**"
   ],
+  setupFiles: ["<rootDir>/__test__/pre-setup.js"],
   setupFilesAfterEnv: ["<rootDir>/__test__/setup.js"],
   testPathIgnorePatterns: [
     "<rootDir>/node_modules/",
