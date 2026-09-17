@@ -131,7 +131,9 @@ function BulkSendButton({
 }
 
 BulkSendButton.propTypes = {
-  assignment: PropTypes.shape({ id: PropTypes.number }).isRequired,
+  assignment: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
+  }).isRequired,
   onFinishContact: PropTypes.func.isRequired,
   bulkSendMessages: PropTypes.func.isRequired,
   refreshData: PropTypes.func.isRequired,
